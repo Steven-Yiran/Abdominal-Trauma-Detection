@@ -1,31 +1,13 @@
-# This file may be used to create an environment using:
-# $ conda create --name <env> --file <this file>
-# platform: osx-arm64
-bzip2=1.0.8=h80987f9_5
-ca-certificates=2024.3.11=hca03da5_0
-filelock=3.13.4=pypi_0
-fsspec=2024.3.1=pypi_0
-jinja2=3.1.3=pypi_0
-libffi=3.4.4=hca03da5_0
-markupsafe=2.1.5=pypi_0
-mpmath=1.3.0=pypi_0
-ncurses=6.4=h313beb8_0
-networkx=3.3=pypi_0
-numpy=1.26.4=pypi_0
-openssl=3.0.13=h1a28f6b_0
-pillow=10.3.0=pypi_0
-pip=23.3.1=py311hca03da5_0
-python=3.11.8=hb885b13_0
-readline=8.2=h1a28f6b_0
-setuptools=68.2.2=py311hca03da5_0
-sqlite=3.41.2=h80987f9_0
-sympy=1.12=pypi_0
-tk=8.6.12=hb8d0fd4_0
-torch=2.2.2=pypi_0
-torchaudio=2.2.2=pypi_0
-torchvision=0.17.2=pypi_0
-typing-extensions=4.11.0=pypi_0
-tzdata=2024a=h04d1e81_0
-wheel=0.41.2=py311hca03da5_0
-xz=5.4.6=h80987f9_0
-zlib=1.2.13=h5a0b063_0
+filelock==3.13.4
+fsspec==2024.3.1
+Jinja2==3.1.3
+MarkupSafe==2.1.5
+mpmath==1.3.0
+networkx==3.3
+numpy==1.26.4
+pillow==10.3.0
+sympy==1.12
+torch==2.2.2
+torchaudio==2.2.2
+torchvision==0.17.2
+typing_extensions==4.11.0
