@@ -64,8 +64,8 @@ def train(
     criterion = nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
-    running_loss = 0.0
     for epoch in range(config.num_epochs):
+        running_loss = 0.0
         for data in tqdm(train_dataloader):
             inputs, labels = data['image'], data['labels']
             loss = batch_step(
