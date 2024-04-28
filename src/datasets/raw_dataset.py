@@ -29,6 +29,24 @@ class RawDataset(Dataset):
         self.table = pd.read_csv('../data/train.csv')
 
     def __getitem__(self, index):
+        '''
+        Get the `index`-th patient's data.
+
+        Parameters
+        ----------
+        - `index`: patient's index as in `train.csv` (not `patient_id`)
+
+        Returns
+        -------
+        A tuple consisting of:
+        - `images`: the images of the first series of this patient (for simplicity), of shape `(number of images, number of channels, height, width)`
+        - `bowel_healthy`: a float, either 0 or 1, representing if bowel is healthy
+        - `extravasation_healthy`: a float, either 0 or 1, representing if extravasation is healthy
+        - `kidney_condition`: a one-hot NumPy array of length 3, representing kidney_healthy, kidney_low, kidney_high
+        - `liver_condition`: a one-hot NumPy array of length 3, representing liver_healthy, liver_low, liver_high
+        - `spleen_condition`: a one-hot NumPy array of length 3, representing spleen_healthy, spleen_low, spleen_high
+        '''
+        
         row = self.table.iloc[index]
 
         patient_id = row[patient_id_column_name]
