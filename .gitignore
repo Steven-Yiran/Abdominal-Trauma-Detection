@@ -2,3 +2,5 @@ data/
 .DS_Store
 *.pyc
 src/experiment.ipynb
+__pycache__
+/scratch_paper
