@@ -3,7 +3,7 @@ import sys
 import argparse
 import matplotlib.pyplot as plt
 
-from preprocess import SamplePatientDataset
+from dataset.dataset import SamplePatientDataset
 
 def parse_args():
     """Parse command line arguments"""
@@ -12,22 +12,31 @@ def parse_args():
 
     return parser.parse_args()
 
+class Config:
+
+    # Data
+    train_csv = "../data/train.csv"
+    img_dir = "../data"
+
+    # Preprocessing
+    input_size = 224
+
+    # Model
+    model_name = "efficientnet_b0"
+    num_classes = 13
+
+    # Training
+    num_epochs = 10
+    batch_size = 32
+
 def main():
+    config = Config()
+
     args = parse_args()
-    # Run script from location of main.py
-    os.chdir(sys.path[0])
 
-    # Load and preprocess the data from the data directory
-    dataset = SamplePatientDataset(
-        csv_file=f"{args.data}/train.csv",
-        img_dir=f"{args.data}"
-    )
+    from training.main import train
 
-    print(dataset[0])
-
-    ## Do something with the data
-
-
+    train(config)
 
 
 if __name__ == "__main__":

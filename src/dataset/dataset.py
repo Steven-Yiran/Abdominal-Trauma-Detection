@@ -5,6 +5,7 @@ Reference: https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
 import os
 import torch
 import pandas as pd
+from skimage import io
 from torchvision.io import read_image
 from torch.utils.data import Dataset
 
@@ -26,16 +27,8 @@ class SamplePatientDataset(Dataset):
 
         self.classes = IMG_TARGETS_EXTENDED
 
-        # Dictionary for label index to label name
-        self.idx_to_label = {}
-        self.label_to_idx = {}
-        label_names = self.patient_frame.iloc[:, 1:14].columns.astype('str')
-        for i, label in enumerate(label_names):
-            self.idx_to_label[i] = label
-            self.label_to_idx[label] = i
-
     def __len__(self):
-        return len(self.patient_frame) * len(self.classes)
+        return len(self.patient_frame)
     
     def __getitem__(self, idx):
         """
@@ -52,12 +45,12 @@ class SamplePatientDataset(Dataset):
             idx = idx.tolist()
         
         image_path = os.path.join(self.img_dir, self.patient_frame.iloc[idx].image_path)
-        img = read_image(image_path)
-        img = img.float() / 255.0
-        labels = self.patient_frame.iloc[idx, 1:14].values.astype('float')
+        img = io.imread(image_path)
+        label = self.patient_frame.iloc[idx, 1:14].values.astype('float')
+        sample = {'image': img, 'label': label}
 
         if self.transform:
-            img = self.transform(img)
+            sample = self.transform(sample)
         
-        return img, labels
+        return sample
 
