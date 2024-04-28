@@ -27,14 +27,6 @@ class SamplePatientDataset(Dataset):
 
         self.classes = IMG_TARGETS_EXTENDED
 
-        # Dictionary for label index to label name
-        self.idx_to_label = {}
-        self.label_to_idx = {}
-        label_names = self.patient_frame.iloc[:, 1:14].columns.astype('str')
-        for i, label in enumerate(label_names):
-            self.idx_to_label[i] = label
-            self.label_to_idx[label] = i
-
     def __len__(self):
         return len(self.patient_frame)
     
@@ -54,8 +46,8 @@ class SamplePatientDataset(Dataset):
         
         image_path = os.path.join(self.img_dir, self.patient_frame.iloc[idx].image_path)
         img = io.imread(image_path)
-        labels = self.patient_frame.iloc[idx, 1:14].values.astype('float')
-        sample = {'image': img, 'labels': labels}
+        label = self.patient_frame.iloc[idx, 1:14].values.astype('float')
+        sample = {'image': img, 'label': label}
 
         if self.transform:
             sample = self.transform(sample)

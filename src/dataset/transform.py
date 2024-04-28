@@ -17,7 +17,7 @@ class Rescale(object):
         self.output_size = output_size
 
     def __call__(self, sample):
-        image, labels = sample['image'], sample['labels']
+        image, label = sample['image'], sample['label']
 
         h, w = image.shape[:2]
         if isinstance(self.output_size, int):
@@ -34,7 +34,7 @@ class Rescale(object):
         # expand dim
         img = img[:, :, None]
 
-        return {'image': img, 'labels': labels}
+        return {'image': img, 'label': label}
     
 class RandomCrop(object):
     """Crop randomly the image in a sample.
@@ -52,7 +52,7 @@ class RandomCrop(object):
             self.output_size = output_size
 
     def __call__(self, sample):
-        image, labels = sample['image'], sample['labels']
+        image, label = sample['image'], sample['label']
 
         h, w = image.shape[:2]
         new_h, new_w = self.output_size
@@ -63,16 +63,16 @@ class RandomCrop(object):
         image = image[top: top + new_h,
                       left: left + new_w]
 
-        return {'image': image, 'labels': labels}
+        return {'image': image, 'label': label}
     
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
-        image, labels = sample['image'], sample['labels']
+        image, label = sample['image'], sample['label']
 
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
         image = image.transpose((2, 0, 1))
         return {'image': torch.from_numpy(image),
-                'labels': torch.from_numpy(labels)}
+                'label': torch.from_numpy(label)}

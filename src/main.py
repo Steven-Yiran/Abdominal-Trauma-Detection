@@ -27,6 +27,7 @@ class Config:
 
     # Training
     num_epochs = 10
+    batch_size = 32
 
 def main():
     config = Config()
