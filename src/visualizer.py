@@ -10,7 +10,8 @@ def drawAccuracyComparisons(title : str, categories: list, accuracy : list, path
             title:string, 
             categories: List of string (X-axis), 
             accuracy : List of float (Y-axis),
-            path : path to save/store the diagram 
+            path : path to save/store the diagram, just path end with "/"
+                   for example : "../data/"
             )
     """
     if len(categories) != len(accuracy):
@@ -25,7 +26,7 @@ def drawAccuracyComparisons(title : str, categories: list, accuracy : list, path
     plt.title(title)
 
 
-    plt.savefig(path + 'bar_graph.png')
+    plt.savefig(path + 'accuracy_compare.png')
     # You can use plt.show() to show the new diagram and do not need to save it
     # plt.show() 
     plt.close()
