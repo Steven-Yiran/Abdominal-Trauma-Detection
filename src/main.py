@@ -20,23 +20,28 @@ class Config:
 
     # Preprocessing
     input_size = 224
+    crop_size = 224
 
     # Model
     model_name = "efficientnet_b0"
     num_classes = 13
 
     # Training
-    num_epochs = 10
+    num_epochs = 5
     batch_size = 32
+    learning_rate = 0.001
+    report_interval = 10
 
 def main():
     config = Config()
 
     args = parse_args()
 
-    from training.main import train
+    from training.train import train
 
     train(config)
+
+    # TODO: run LSTM
 
 
 if __name__ == "__main__":
