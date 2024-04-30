@@ -53,7 +53,7 @@ class RawDataset(Dataset):
         patient_path = f'../data/train_images/{patient_id}'
         series_path = os.path.join(patient_path, os.listdir(patient_path)[0])
 
-        image_paths = [os.path.join(series_path, file_name) for file_name in os.listdir(series_path)]
+        image_paths = sorted([os.path.join(series_path, file_name) for file_name in os.listdir(series_path)])
         images = np.array([read_image(image_path).to(torch.float32) / 255.0 for image_path in image_paths])
 
         bowel_healthy = row[bowel_healthy_column_name].astype(np.float32)
