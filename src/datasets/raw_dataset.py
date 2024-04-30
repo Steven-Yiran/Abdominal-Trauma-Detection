@@ -24,9 +24,18 @@ spleen_low_column_name = 'spleen_low'
 spleen_high_column_name = 'spleen_high'
 
 class RawDataset(Dataset):
-
+    '''
+    Raw dataset.
+    '''
+    
     def __init__(self):
         self.table = pd.read_csv('../data/train.csv')
+
+    def __len__(self):
+        '''
+        Returns the number of patients
+        '''
+        return len(self.table)
 
     def __getitem__(self, index):
         '''
@@ -98,6 +107,7 @@ class RawDataset(Dataset):
 
 if __name__ == '__main__':
     dataset = RawDataset()
+    print(len(dataset))
     for i, (images, bowel_healthy, extravasation_healthy, kidney_condition, liver_condition, spleen_condition) in enumerate(dataset):
         print(f'### sample {i} ###')
         print(images.shape)
