@@ -20,6 +20,8 @@ target_columns = {
     'spleen': ['spleen_healthy', 'spleen_low', 'spleen_high']
 }
 
+# class WrapperClass
+
 # class PatientDatasetBaseline
 
 # class PatientDatasetRandom
@@ -43,7 +45,7 @@ class PatientDataset(Dataset):
         # TODO: loading wil be different for training and testing
 
     def __len__(self):
-        return len(self.table) * self.num_classes
+        return len(self.table) * self.num_classes # 2 * 5 = 10
 
     def __getitem__(self, index):
         '''
