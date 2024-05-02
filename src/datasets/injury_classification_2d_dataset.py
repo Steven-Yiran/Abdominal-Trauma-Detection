@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 from torch.utils.data import Dataset
-from raw_dataset import RawDataset
+from datasets.raw_dataset import RawDataset
 
 
 class InjuryClassification2DDataset(Dataset):
@@ -11,7 +11,8 @@ class InjuryClassification2DDataset(Dataset):
     Dataset for training the "2D injury classification model".
     '''
     
-    def __init__(self, raw_dataset: RawDataset, sample):
+    def __init__(self, raw_dataset: RawDataset, sample, transform=None):
+        self.transform = transform
         self.pairs = []
         for i in range(len(raw_dataset)):
             (
@@ -35,7 +36,7 @@ class InjuryClassification2DDataset(Dataset):
             for image in sampled_images:
                 self.pairs.append({
                     'image': image,
-                    'labels': labels
+                    'label': labels
                 })
 
     def __len__(self):
@@ -51,17 +52,20 @@ class InjuryClassification2DDataset(Dataset):
 
         Returns
         -------
-        `{'image': np.array, 'labels': {'bowel': np.float32, 'extravasation': np.float32, 'kidney': np.array, 'liver': np.array, 'spleen': np.array}}`
+        `{'image': np.array, 'label': {'bowel': np.float32, 'extravasation': np.float32, 'kidney': np.array, 'liver': np.array, 'spleen': np.array}}`
         '''
+        if self.transform:
+            return self.transform(self.pairs[index])
+
         return self.pairs[index]
         
 
 
 if __name__ == '__main__':
+    from raw_dataset import RawDataset
     raw_dataset = RawDataset()
 
     dataset = InjuryClassification2DDataset(raw_dataset, lambda x: x)
 
-    for image, label in dataset:
-        print(image.shape)
-        print(label.shape)
+    for sample in dataset:
+        print(sample)
