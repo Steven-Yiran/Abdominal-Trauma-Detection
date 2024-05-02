@@ -11,18 +11,29 @@ class InjuryClassification2DDataset(Dataset):
     Dataset for training the "2D injury classification model".
     '''
     
-    def __init__(self, raw_dataset: RawDataset, sample, transform=None):
+    def __init__(self, raw_dataset: RawDataset, sample, transform=None, is_train=True):
         self.transform = transform
         self.pairs = []
         for i in range(len(raw_dataset)):
-            (
-                images,
-                bowel_healthy,
-                extravasation_healthy,
-                kidney_condition,
-                liver_condition,
-                spleen_condition
-            ) = raw_dataset[i]
+            if is_train:
+                (
+                    images,
+                    bowel_healthy,
+                    extravasation_healthy,
+                    kidney_condition,
+                    liver_condition,
+                    spleen_condition
+                ) = raw_dataset[i]
+            else:
+                (
+                    images,
+                    bowel_healthy,
+                    extravasation_healthy,
+                    kidney_condition,
+                    liver_condition,
+                    spleen_condition,
+                    patient_id
+                ) = raw_dataset[i]
 
             labels = {
                 'bowel': bowel_healthy,
@@ -34,10 +45,17 @@ class InjuryClassification2DDataset(Dataset):
 
             sampled_images = sample(images)
             for image in sampled_images:
-                self.pairs.append({
-                    'image': image,
-                    'label': labels
-                })
+                if is_train:
+                    self.pairs.append({
+                        'image': image,
+                        'label': labels
+                    })
+                else:
+                    self.pairs.append({
+                        'image': image,
+                        'label': labels,
+                        'patient_id': patient_id
+                    })
 
     def __len__(self):
         return len(self.pairs)

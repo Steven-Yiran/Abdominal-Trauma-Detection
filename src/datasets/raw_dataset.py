@@ -28,8 +28,9 @@ class RawDataset(Dataset):
     Raw dataset.
     '''
     
-    def __init__(self):
+    def __init__(self, is_train=True):
         self.table = pd.read_csv('../data/train.csv')
+        self.is_train = is_train
 
     def __len__(self):
         '''
@@ -96,14 +97,25 @@ class RawDataset(Dataset):
             dtype=np.float32
         )
 
-        return (
-            images,
-            bowel_healthy,
-            extravasation_healthy,
-            kidney_condition,
-            liver_condition,
-            spleen_condition
-        )
+        if self.is_train:
+            return (
+                images,
+                bowel_healthy,
+                extravasation_healthy,
+                kidney_condition,
+                liver_condition,
+                spleen_condition
+            )
+        else:
+            return (
+                images,
+                bowel_healthy,
+                extravasation_healthy,
+                kidney_condition,
+                liver_condition,
+                spleen_condition,
+                patient_id
+            )
 
 if __name__ == '__main__':
     dataset = RawDataset()

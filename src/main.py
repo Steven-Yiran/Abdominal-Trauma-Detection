@@ -17,6 +17,19 @@ class Config:
     # Data
     train_csv = "../data/train.csv"
     img_dir = "../data"
+    class_names = [
+        "bowel_healthy",
+        "extravasation_healthy",
+        "kidney_healthy",
+        "kidney_low",
+        "kidney_high",
+        "liver_healthy",
+        "liver_low",
+        "liver_high",
+        "spleen_healthy",
+        "spleen_low",
+        "spleen_high"
+    ]
 
     # Preprocessing
     input_size = 224
@@ -30,7 +43,10 @@ class Config:
     num_epochs = 1
     batch_size = 32
     learning_rate = 0.001
-    model_checkpoint_name = "model"
+    model_checkpoint_name = "../models/model"
+
+    # Inference
+    results_csv = "../results/results.csv"
 
 
 def main():
