@@ -32,7 +32,7 @@ class InjuryClassification2DDataset(Dataset):
                 'spleen': spleen_condition
             }
             sampled_images = sample(images)
-            print(len(sampled_images))
+            #print("sampled data size = ", len(sampled_images))
             for image in sampled_images:
                 self.pairs.append({
                     'image': image,
@@ -60,8 +60,8 @@ class InjuryClassification2DDataset(Dataset):
 
 if __name__ == '__main__':
     raw_dataset = RawDataset()
-    #dataset = InjuryClassification2DDataset(raw_dataset, sampling.normal_distribution_sampling)
-    dataset = InjuryClassification2DDataset(raw_dataset, sampling.uniformly_random_sampling)
+    dataset = InjuryClassification2DDataset(raw_dataset, sampling.organ_based_sampleing)
+    #dataset = InjuryClassification2DDataset(raw_dataset, sampling.uniformly_random_sampling)
 
     for i in range(len(dataset)):
 
