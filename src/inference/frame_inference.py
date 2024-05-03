@@ -1,48 +1,49 @@
 import torch
-import torch.nn as nn
+import pandas as pd
 from tqdm import tqdm
 
 from model_zoo.injury_classification import define_model
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
 
-def infer_frame_injuries(config):
-    """Infer frame-level injuries and save the results to a CSV file.
-    """
-    patient_dataset = RawDataset(is_train=False)
-    inference_dataset = InjuryClassification2DDataset(patient_dataset, lambda x: x, is_train=False)
-    
-    model = define_model(config.model_name)
-    model.load_state_dict(torch.load(f'{config.model_checkpoint_name}.pth'))
+def infer_frame_organs(config):
+    target_columns = ['patient_id', 'series', 'frame', 'pred_liver', 'pred_spleen', 'pred_kidney', 'pred_bowel']
+    df = pd.read_csv(config.segmentations_csv)
+    df = df[target_columns]
+    return df
 
+def infer_frame_injuries(model, inference_dataset, activations, config):
+    """Infer frame-level injuries.
+    """
     model.eval()
 
-    activations = {
-        'bowel': nn.Sigmoid(),
-        'extravasation': nn.Sigmoid(),
-        'kidney': nn.Softmax(dim=1),
-        'liver': nn.Softmax(dim=1),
-        'spleen': nn.Softmax(dim=1)
-    }
+    results = []
+    pbar = tqdm(total=len(inference_dataset), desc='Inference')
+    for i in range(len(inference_dataset)):
+        images, metadata = inference_dataset[i]['image'], inference_dataset[i]['metadata']
+        patient_id = metadata['patient_id']
+        series_id = metadata['series_id']
+        frame_id = metadata['frame_ids']
 
-    with open(config.results_csv, 'w') as f:
-        columns = ['patient_id'] + config.class_names
-        f.write(','.join(columns) + '\n')
+        images = torch.tensor(images).unsqueeze(0)
+        outputs = model(images)
+        
+        # Extract the probabilities from the model outputs
+        probabilities = [
+            activations[key](value).detach().numpy().flatten()
+            for key, value in outputs.items()
+        ]
 
-        for i in tqdm(range(len(inference_dataset))):
-            images, patient_id = inference_dataset[i]['image'], inference_dataset[i]['patient_id']
+        flattened_probabilities = [item for sublist in probabilities for item in sublist]
 
-            images = torch.tensor(images).unsqueeze(0)
-            outputs = model(images)
-            
-            # Extract the probabilities from the model outputs
-            probabilities = [
-                activations[key](value).detach().numpy().flatten()
-                for key, value in outputs.items()
-            ]
+        results.append({
+            'patient_id': patient_id,
+            'series': series_id,
+            'frame': frame_id,
+            **dict(zip(config.class_names, flattened_probabilities))
+        })
+        pbar.update(1)
 
-            flattened_probabilities = [item for sublist in probabilities for item in sublist]
-
-            f.write(f'{patient_id},{",".join(map(str, flattened_probabilities))}\n')
-
-    print(f'Inference results saved to {config.results_csv}')
+    pbar.close()
+    
+    return results

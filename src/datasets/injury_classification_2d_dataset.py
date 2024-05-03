@@ -11,51 +11,31 @@ class InjuryClassification2DDataset(Dataset):
     Dataset for training the "2D injury classification model".
     '''
     
-    def __init__(self, raw_dataset: RawDataset, sample, transform=None, is_train=True):
+    def __init__(self, raw_dataset: RawDataset, sample=None, transform=None, is_train=True):
         self.transform = transform
         self.pairs = []
         for i in range(len(raw_dataset)):
-            if is_train:
-                (
-                    images,
-                    bowel_healthy,
-                    extravasation_healthy,
-                    kidney_condition,
-                    liver_condition,
-                    spleen_condition
-                ) = raw_dataset[i]
-            else:
-                (
-                    images,
-                    bowel_healthy,
-                    extravasation_healthy,
-                    kidney_condition,
-                    liver_condition,
-                    spleen_condition,
-                    patient_id
-                ) = raw_dataset[i]
+            (
+                images,
+                labels,
+                metadata
+            ) = raw_dataset[i] 
 
-            labels = {
-                'bowel': bowel_healthy,
-                'extravasation': extravasation_healthy,
-                'kidney': kidney_condition,
-                'liver': liver_condition,
-                'spleen': spleen_condition
-            }
+            if sample:
+                images = sample(images)
 
-            sampled_images = sample(images)
-            for image in sampled_images:
-                if is_train:
-                    self.pairs.append({
-                        'image': image,
-                        'label': labels
-                    })
-                else:
-                    self.pairs.append({
-                        'image': image,
-                        'label': labels,
-                        'patient_id': patient_id
-                    })
+            for i in range(len(images)):
+                data = {
+                    'image': images[i],
+                    'label': labels
+                }
+                if not is_train:
+                    data['metadata'] = {
+                        'patient_id': metadata['patient_id'],
+                        'series_id': metadata['series_id'],
+                        'frame_ids': metadata['frame_ids'][i],
+                    }
+                self.pairs.append(data)
 
     def __len__(self):
         return len(self.pairs)

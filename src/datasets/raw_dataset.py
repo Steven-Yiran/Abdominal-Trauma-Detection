@@ -23,14 +23,13 @@ spleen_healthy_column_name = 'spleen_healthy'
 spleen_low_column_name = 'spleen_low'
 spleen_high_column_name = 'spleen_high'
 
-class RawDataset(Dataset):
+class RawDataset():
     '''
     Raw dataset.
     '''
     
-    def __init__(self, is_train=True):
+    def __init__(self):
         self.table = pd.read_csv('../data/train.csv')
-        self.is_train = is_train
 
     def __len__(self):
         '''
@@ -61,9 +60,12 @@ class RawDataset(Dataset):
 
         patient_id = row[patient_id_column_name]
         patient_path = f'../data/train_images/{patient_id}'
-        series_path = os.path.join(patient_path, os.listdir(patient_path)[0])
-
+        # select the first series of the patient
+        series_id = int(os.listdir(patient_path)[0])
+        series_path = os.path.join(patient_path, str(series_id))
+        frame_ids = sorted([int(file_name.split('.')[0]) for file_name in os.listdir(series_path)])
         image_paths = sorted([os.path.join(series_path, file_name) for file_name in os.listdir(series_path)])
+
         images = np.array([read_image(image_path).to(torch.float32) / 255.0 for image_path in image_paths])
 
         bowel_healthy = row[bowel_healthy_column_name].astype(np.float32)
@@ -97,25 +99,25 @@ class RawDataset(Dataset):
             dtype=np.float32
         )
 
-        if self.is_train:
-            return (
-                images,
-                bowel_healthy,
-                extravasation_healthy,
-                kidney_condition,
-                liver_condition,
-                spleen_condition
-            )
-        else:
-            return (
-                images,
-                bowel_healthy,
-                extravasation_healthy,
-                kidney_condition,
-                liver_condition,
-                spleen_condition,
-                patient_id
-            )
+        labels = {
+            'bowel': bowel_healthy,
+            'extravasation': extravasation_healthy,
+            'kidney': kidney_condition,
+            'liver': liver_condition,
+            'spleen': spleen_condition
+        }
+
+        metadata = {
+            'patient_id': patient_id,
+            'series_id': series_id,
+            'frame_ids': frame_ids
+        }
+
+        return (
+            images,
+            labels,
+            metadata
+        )
 
 if __name__ == '__main__':
     dataset = RawDataset()

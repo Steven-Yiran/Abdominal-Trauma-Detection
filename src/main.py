@@ -7,7 +7,7 @@ def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description="My program description")
     parser.add_argument("--train-classifier", action="store_true", help="Train the injury classifier")
-    parser.add_argument("--inference-frame-injuries", action="store_true", help="Inference on frame-level injuries")
+    parser.add_argument("--frame-inference", action="store_true", help="Inference on frame-level injuries and organ probabilities")
 
     return parser.parse_args()
 
@@ -46,7 +46,8 @@ class Config:
     model_checkpoint_name = "../models/model"
 
     # Inference
-    results_csv = "../results/results.csv"
+    segmentations_csv = "../data/df_images_train_with_seg.csv"
+    frame_label_path = "../results/frame_labels.csv"
 
 
 def main():
@@ -59,10 +60,10 @@ def main():
 
         train(config)
     
-    if args.inference_frame_injuries:
-        from inference.frame_inference import infer_frame_injuries
+    if args.frame_inference:
+        from data_preparation.rnn_training_data import generate
 
-        infer_frame_injuries(config)
+        generate(config)
 
 if __name__ == "__main__":
     main()
