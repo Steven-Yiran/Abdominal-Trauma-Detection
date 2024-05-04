@@ -3,8 +3,11 @@ import torch
 import numpy as np
 
 from torch.utils.data import Dataset
-from datasets.raw_dataset import RawDataset
+from raw_dataset import RawDataset
+import sampling
 
+UNIFORM = 'Uniform'
+ORGAN = 'OrganBased'
 
 class InjuryClassification2DDataset(Dataset):
     '''
@@ -22,9 +25,10 @@ class InjuryClassification2DDataset(Dataset):
             ) = raw_dataset[i] 
 
             if sample:
-                images = sample(images)
+                sample_index = sample(metadata, UNIFORM)
+                pass
 
-            for i in range(len(images)):
+            for i in sample_index:
                 data = {
                     'image': images[i],
                     'label': labels
@@ -63,7 +67,7 @@ if __name__ == '__main__':
     from raw_dataset import RawDataset
     raw_dataset = RawDataset()
 
-    dataset = InjuryClassification2DDataset(raw_dataset, lambda x: x)
+    dataset = InjuryClassification2DDataset(raw_dataset, sample = sampling.collectSamplingData)
 
     for sample in dataset:
         print(sample)
