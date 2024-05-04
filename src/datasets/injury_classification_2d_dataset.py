@@ -1,10 +1,9 @@
 
 import torch
 import numpy as np
-import sampling
 
 from torch.utils.data import Dataset
-from raw_dataset import RawDataset
+from datasets.raw_dataset import RawDataset
 
 
 class InjuryClassification2DDataset(Dataset):
@@ -12,32 +11,31 @@ class InjuryClassification2DDataset(Dataset):
     Dataset for training the "2D injury classification model".
     '''
     
-    def __init__(self, raw_dataset: RawDataset, sample):
+    def __init__(self, raw_dataset: RawDataset, sample=None, transform=None, is_train=True):
+        self.transform = transform
         self.pairs = []
         for i in range(len(raw_dataset)):
             (
                 images,
-                bowel_healthy,
-                extravasation_healthy,
-                kidney_condition,
-                liver_condition,
-                spleen_condition
-            ) = raw_dataset[i]
+                labels,
+                metadata
+            ) = raw_dataset[i] 
 
-            labels = {
-                'bowel': bowel_healthy,
-                'extravasation': extravasation_healthy,
-                'kidney': kidney_condition,
-                'liver': liver_condition,
-                'spleen': spleen_condition
-            }
-            sampled_images = sample(images)
-            #print("sampled data size = ", len(sampled_images))
-            for image in sampled_images:
-                self.pairs.append({
-                    'image': image,
-                    'labels': labels
-                })
+            if sample:
+                images = sample(images)
+
+            for i in range(len(images)):
+                data = {
+                    'image': images[i],
+                    'label': labels
+                }
+                if not is_train:
+                    data['metadata'] = {
+                        'patient_id': metadata['patient_id'],
+                        'series_id': metadata['series_id'],
+                        'frame_ids': metadata['frame_ids'][i],
+                    }
+                self.pairs.append(data)
 
     def __len__(self):
         return len(self.pairs)
@@ -52,21 +50,20 @@ class InjuryClassification2DDataset(Dataset):
 
         Returns
         -------
-        `{'image': np.array, 'labels': {'bowel': np.float32, 'extravasation': np.float32, 'kidney': np.array, 'liver': np.array, 'spleen': np.array}}`
+        `{'image': np.array, 'label': {'bowel': np.float32, 'extravasation': np.float32, 'kidney': np.array, 'liver': np.array, 'spleen': np.array}}`
         '''
+        if self.transform:
+            return self.transform(self.pairs[index])
+
         return self.pairs[index]
         
 
 
 if __name__ == '__main__':
+    from raw_dataset import RawDataset
     raw_dataset = RawDataset()
-    dataset = InjuryClassification2DDataset(raw_dataset, sampling.organ_based_sampleing)
-    #dataset = InjuryClassification2DDataset(raw_dataset, sampling.uniformly_random_sampling)
 
-    for i in range(len(dataset)):
+    dataset = InjuryClassification2DDataset(raw_dataset, lambda x: x)
 
-        # Print each sampled frame
-        print(dataset[i]['image'])
-        # Print each label of sampled frame
-        print(dataset[i]['labels'])
-
+    for sample in dataset:
+        print(sample)

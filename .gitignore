@@ -1,4 +1,5 @@
 data/
+mini-data/
 .DS_Store
 *.pyc
 src/experiment.ipynb
