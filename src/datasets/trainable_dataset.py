@@ -77,14 +77,14 @@ class StrategiesAppliedDataset(Dataset):
                 raise ValueError ('invalid strategy was given')
         
 
-# if __name__ == '__main__':
-#     test = StrategiesAppliedDataset()
-#     data1 = test["normal"]
-#     data2 = test["random"]
-#     for i, (images, bowel_healthy, extravasation_healthy, kidney_condition, liver_condition, spleen_condition) in enumerate(data1):
-#         print(f'### normal strategy sample {i} ###')
-#         print(images.shape)
-#         print(images.dtype)
+if __name__ == '__main__':
+    test = StrategiesAppliedDataset()
+    data1 = test["normal"]
+    data2 = test["random"]
+    for i, (images, bowel_healthy, extravasation_healthy, kidney_condition, liver_condition, spleen_condition) in enumerate(data1):
+        print(f'### normal strategy sample {i} ###')
+        print(images.shape)
+        print(images.dtype)
 
 #     for i, (images, bowel_healthy, extravasation_healthy, kidney_condition, liver_condition, spleen_condition) in enumerate(data2):
 #         print(f'### random strategy sample {i} ###')

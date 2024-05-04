@@ -10,7 +10,7 @@ ORGAN_SEG_INPUT_PATH = "../data/p_organ_images/organ_seg/df_images_train_with_se
 ORGAN_SEG_OUTPUT_PATH = "../data/p_organ_images/organ_seg/output_test.csv"
 NUMBER_OF_FRAMES_PER_ORGAN = 10
 
-def organ_based_sampleing(images):
+def organ_based_sampleing(metadata):
 
     """
         The method takes two input parameters to generates organ-based sampling 
@@ -24,32 +24,32 @@ def organ_based_sampleing(images):
         raise ValueError("Number of images extraction over the upper bond")
     
     sampling = []
-    patient_ids = get_patient_id_from_train_csv()
+    patient_ids = get_patient_id_from_train_csv(metadata)
     for pid in patient_ids:
+
+
+
+
+
+
+
         liver, spleen, bowel, kidney = get_organ_sampling_images_index(patient_id = pid, 
                                                                        num_frames = NUMBER_OF_FRAMES_PER_ORGAN)
         sampling += liver + spleen + bowel + kidney
-        # print("pid = ", pid)
-        # print("liver = ", liver, "size = ", len(liver))
-        # print("spleen = ", spleen, "size = ", len(spleen))
-        # print("bowel = ", bowel, "size = ", len(bowel))
-        # print("kidney = ", kidney, "size = ", len(kidney))
-
-        # print("pid sampling = ", sampling)
 
     return np.array([images[i] for i in sampling])
 
 
-def uniformly_random_sampling(images):
-    upper_bound = get_upper_bond()
-    selected_indices = set()
-    while len(selected_indices) < int(upper_bound * 0.7):
-        random_number = int(np.random.normal(0, 1) * upper_bound)
-        random_number = np.clip(random_number, 0, upper_bound - 1)
-        if random_number not in selected_indices:
-            selected_indices.add(random_number)
-    index_list = sorted(selected_indices)
-    return np.array([images[i] for i in index_list])
+# def uniformly_random_sampling(images):
+#     upper_bound = get_upper_bond()
+#     selected_indices = set()
+#     while len(selected_indices) < int(upper_bound * 0.7):
+#         random_number = int(np.random.normal(0, 1) * upper_bound)
+#         random_number = np.clip(random_number, 0, upper_bound - 1)
+#         if random_number not in selected_indices:
+#             selected_indices.add(random_number)
+#     index_list = sorted(selected_indices)
+#     return np.array([images[i] for i in index_list])
 
 
 def get_upper_bond():
@@ -97,24 +97,14 @@ def get_organ_sampling_images_index(patient_id : str, num_frames : int):
             p_spleen = float(row['pred_spleen'])
             p_bowel = float(row['pred_bowel'])
             p_kidney = float(row['pred_kidney'])
-            if (p_liver >= threshold) and (ptr < 50):
+            if p_liver >= threshold:
                 liver.append(ptr)
-            if (p_spleen >= threshold) and (ptr < 50):
+            elif p_spleen >= threshold:
                 spleen.append(ptr)
-            if (p_bowel >= threshold) and (ptr < 50):
+            elif p_bowel >= threshold:
                 bowel.append(ptr)
-            if (p_kidney >= threshold) and (ptr < 50):
+            elif p_kidney >= threshold:
                 kidney.append(ptr)
-
-            ## Random pick seg images 
-            # if (p_liver >= threshold):
-            #     liver.append(ptr)
-            # if (p_spleen >= threshold):
-            #     spleen.append(ptr)
-            # if (p_bowel >= threshold):
-            #     bowel.append(ptr)
-            # if (p_kidney >= threshold):
-            #     kidney.append(ptr)
             ptr += 1
         else:
             ptr = 0
@@ -136,6 +126,10 @@ def get_organ_sampling_images_index(patient_id : str, num_frames : int):
 
     return liver, spleen, bowel, kidney
 
+
+
+if __name__ == '__main__':
+    get_upper_bond()
 
 
 
