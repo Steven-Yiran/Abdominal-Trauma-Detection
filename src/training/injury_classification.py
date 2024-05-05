@@ -3,6 +3,7 @@ import torch.nn as nn
 from torchvision import transforms
 from torchvision.transforms import v2 as T
 from torch.utils.data import DataLoader, random_split, Subset
+from tqdm import tqdm
 
 from model_zoo.injury_classification import define_model
 from datasets.raw_dataset import RawDataset
@@ -29,6 +30,7 @@ def train_one_epoch(
     running_loss = 0.
     last_loss = 0.
 
+    pbar = tqdm(train_dataloader, total=len(train_dataloader))
     for i, data in enumerate(train_dataloader):
         image, labels = data['image'], data['label']
         optimizer.zero_grad()
@@ -42,6 +44,8 @@ def train_one_epoch(
             last_loss = running_loss / report_interval
             print(f'[{i}/{len(train_dataloader)}]\tLoss: {loss.item():.6f}')
             running_loss = 0.
+        
+        pbar.update(1)
 
     return last_loss
 
@@ -100,6 +104,7 @@ def train(config):
     print(f'Loaded {len(val_dataset)} validation samples')
 
     model = define_model(config.model_name)
+    model.to(config.device)
 
     criterion_dict = {
         'bowel': nn.BCEWithLogitsLoss(),

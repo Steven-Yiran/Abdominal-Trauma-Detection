@@ -1,13 +1,12 @@
-import os
-import sys
+import torch
 import argparse
-import matplotlib.pyplot as plt
 
 def parse_args():
     """Parse command line arguments"""
     parser = argparse.ArgumentParser(description="My program description")
     parser.add_argument("--train-classifier", action="store_true", help="Train the injury classifier")
     parser.add_argument("--frame-inference", action="store_true", help="Inference on frame-level injuries and organ probabilities")
+    parser.add_argument("--train-rnn", action="store_true", help="Train the RNN")
 
     return parser.parse_args()
 
@@ -40,10 +39,17 @@ class Config:
     num_classes = 13
 
     # Training
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     num_epochs = 1
     batch_size = 32
     learning_rate = 0.001
     model_checkpoint_name = "../models/model"
+
+    # Training - RNN
+    input_dim = 15
+    hidden_dim = 128
+    num_layers = 2
+    output_dim = 11
 
     # Inference
     segmentations_csv = "../data/df_images_train_with_seg.csv"
@@ -64,6 +70,11 @@ def main():
         from data_preparation.rnn_training_data import generate
 
         generate(config)
+
+    if args.train_rnn:
+        from training.series_classification import train
+
+        train(config)
 
 if __name__ == "__main__":
     main()

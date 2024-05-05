@@ -31,13 +31,10 @@ def generate(config):
     injury_results_df['series'] = injury_results_df['series'].astype(int)
     frame_predictions = pd.merge(injury_results_df, organ_results_df, on=['patient_id', 'series', 'frame'], how='inner')
 
+    # drop unnecessary columns
+    frame_predictions.drop(columns=['series', 'frame'], inplace=True)
+
     # save frame_predictions to disk
     frame_predictions.to_csv(config.frame_label_path, index=False)
 
     print(f'Results saved to {config.frame_label_path}')
-
-if __name__ == '__main__':
-    organ_classification_model = ... # load from saved model
-    injury_classification_model = ...
-
-    generate(organ_classification_model, injury_classification_model)

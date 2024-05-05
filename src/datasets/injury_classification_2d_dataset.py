@@ -22,6 +22,10 @@ class InjuryClassification2DDataset(Dataset):
             ) = raw_dataset[i] 
 
             if sample:
+                # sample(metadata['patient_id'], metadata['series_id'], metadata['frame_ids'])
+                # frame_ids: [0, 1, 4, 5, 6,...]
+                # image: [image1, image2, image5, image6, image7,...]
+                # frame id 6 -> 4
                 images = sample(images)
 
             for i in range(len(images)):
