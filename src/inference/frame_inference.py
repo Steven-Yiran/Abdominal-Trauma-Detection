@@ -26,6 +26,7 @@ def infer_frame_injuries(model, inference_dataset, activations, config):
         frame_id = metadata['frame_ids']
 
         images = torch.tensor(images).unsqueeze(0)
+        images = images.to(config.device)
         outputs = model(images)
         
         # Extract the probabilities from the model outputs

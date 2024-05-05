@@ -18,11 +18,12 @@ def compute_loss(outputs, labels, criterion_dict):
 
 
 def train_one_epoch(
+    epoch,
     model,
     train_dataloader,
     criterion_dict,
     optimizer,
-    report_interval=10,
+    device,
 ):
     model.zero_grad()
     model.train()
@@ -30,20 +31,17 @@ def train_one_epoch(
     running_loss = 0.
     last_loss = 0.
 
-    pbar = tqdm(train_dataloader, total=len(train_dataloader))
+    pbar = tqdm(train_dataloader, total=len(train_dataloader), desc=f'Training Epoch {epoch}')
     for i, data in enumerate(train_dataloader):
         image, labels = data['image'], data['label']
+        image = image.to(device)
+        labels = {key: value.to(device) for key, value in labels.items()}
         optimizer.zero_grad()
         outputs = model(image)
         loss = compute_loss(outputs, labels, criterion_dict)
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
-
-        if i % report_interval == 0:
-            last_loss = running_loss / report_interval
-            print(f'[{i}/{len(train_dataloader)}]\tLoss: {loss.item():.6f}')
-            running_loss = 0.
         
         pbar.update(1)
 
@@ -54,7 +52,6 @@ def evaluate_one_epoch(
     model,
     val_dataloader,
     criterion_dict,
-    report_interval=10,
 ):
     model.eval()
 
@@ -67,11 +64,6 @@ def evaluate_one_epoch(
         loss = compute_loss(outputs, labels, criterion_dict)
         running_loss += loss.item()
 
-        if i % report_interval == 0:
-            last_loss = running_loss / report_interval
-            print(f'[{i}/{len(val_dataloader)}]\tLoss: {loss.item():.6f}')
-            running_loss = 0.
-
     return last_loss
 
 
@@ -83,7 +75,7 @@ def train(config):
     ])
     raw_dataset = RawDataset()
     # create train test split
-    patient_dataset = InjuryClassification2DDataset(raw_dataset, lambda x: x)
+    patient_dataset = InjuryClassification2DDataset(raw_dataset, transform=transform_fn)
     train_size = int(0.8 * len(patient_dataset))
     val_size = len(patient_dataset) - train_size
     train_dataset, val_dataset = random_split(patient_dataset, [train_size, val_size], generator=generator)
@@ -119,12 +111,13 @@ def train(config):
     best_val_loss = float('inf')
 
     for epoch in range(config.num_epochs):
-        print(f'Epoch {epoch+1}/{config.num_epochs}')
         loss = train_one_epoch(
+            epoch,
             model,
             train_dataloader,
             criterion_dict,
             optimizer,
+            config.device,
         )
         vloss = evaluate_one_epoch(
             model,
@@ -137,5 +130,3 @@ def train(config):
             best_val_loss = vloss
             torch.save(model.state_dict(), f'../models/{config.model_checkpoint_name}.pth')
             print('Model saved')
-
-    # save the model
