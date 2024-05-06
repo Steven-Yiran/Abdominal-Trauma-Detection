@@ -26,10 +26,11 @@ class Resize(object):
         self.t = T.Resize(output_size)
 
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
+        image = sample['image']
         
         image = self.t(image)
-        return {'image': image, 'label': label}
+        sample['image'] = image
+        return sample
     
 class RandomCrop(object):
     """Crop randomly the image in a sample.
@@ -42,23 +43,25 @@ class RandomCrop(object):
         self.t = T.RandomCrop(output_size)
 
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
+        image = sample['image']
 
         image = self.t(image)
 
-        return {'image': image, 'label': label}
+        sample['image'] = image
+        return sample
     
 class ToTensor(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
+        image = sample['image']
 
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
-        image = image.transpose((2, 0, 1))
-        return {'image': torch.from_numpy(image),
-                'label': torch.from_numpy(label)}
+        # image = image.transpose((2, 0, 1))
+        image = T.ToTensor()(image)
+        sample['image'] = image
+        return sample
     
 
 class ToTensorDict(object):
@@ -80,11 +83,13 @@ class ToTensorDict(object):
 class ToPILImage(object):
     """Convert ndarrays in sample to Tensors."""
     def __call__(self, sample):
-        image, label = sample['image'], sample['label']
+        image = sample['image']
         image = image.permute(1, 2, 0).numpy()
         # swap color axis because
         # numpy image: H x W x C
         # torch image: C X H X W
         image = T.ToPILImage()(image)
-        return {'image': image,
-                'label': label}
+        
+        # preserve other keys
+        sample['image'] = image
+        return sample

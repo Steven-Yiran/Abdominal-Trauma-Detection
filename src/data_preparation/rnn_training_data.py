@@ -1,21 +1,42 @@
 import torch
 import torch.nn as nn
+from torchvision import transforms
 import pandas as pd
+import os
 
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
-from inference.frame_inference import infer_frame_injuries, infer_frame_organs
+from inference.frame_inference import infer_frame_injuries, infer_frame_organs, infer_frame_injuries_batch
 from model_zoo.injury_classification import define_model
+from utils.transform import ToTensor, Resize, RandomCrop, ToPILImage
 
 
 def generate(config):
+    """
+    Generate frame-level injury predictions and organ segmentations.
+    """
+    if not os.path.exists(config.segmentations_csv):
+        raise FileNotFoundError(f'File not found: {config.segmentations_csv}')
+    
+    test_transform = transforms.Compose([
+        ToPILImage(),
+        Resize(config.input_size),
+        RandomCrop(config.input_size),
+        ToTensor()
+    ])
+    
     patient_dataset = RawDataset(csv_path=config.train_csv, image_dir=config.img_dir)
-    inference_dataset = InjuryClassification2DDataset(patient_dataset, is_train=False)
+    inference_dataset = InjuryClassification2DDataset(patient_dataset, is_train=False, transform=test_transform)
+    inference_dataloader = torch.utils.data.DataLoader(
+        inference_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=1
+    )
 
     model = define_model(config.model_name)
     model.load_state_dict(torch.load(f'{config.model_checkpoint_name}.pth'))
     model.to(config.device)
-    model.eval()
 
     activations = {
         'bowel': nn.Sigmoid(),
@@ -25,7 +46,8 @@ def generate(config):
         'spleen': nn.Softmax(dim=1)
     }
 
-    injury_results = infer_frame_injuries(model, inference_dataset, activations, config)
+    #injury_results = infer_frame_injuries(model, inference_dataset, activations, config)
+    injury_results = infer_frame_injuries_batch(model, inference_dataloader, activations, config)
     injury_results_df = pd.DataFrame(injury_results)
     organ_results_df = infer_frame_organs(config)
     
