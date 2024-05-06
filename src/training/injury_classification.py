@@ -29,7 +29,7 @@ def train_one_epoch(
     model.train()
 
     running_loss = 0.
-    last_loss = 0.
+    last_loss = 0. # total / num_batches
 
     pbar = tqdm(train_dataloader, total=len(train_dataloader), desc=f'Training Epoch {epoch}')
     for i, data in enumerate(train_dataloader):
@@ -42,6 +42,10 @@ def train_one_epoch(
         loss.backward()
         optimizer.step()
         running_loss += loss.item()
+
+        if i % 10 == 0:
+            last_loss = running_loss / (i + 1)
+            pbar.set_postfix({'loss': running_loss / (i + 1)})
         
         pbar.update(1)
 
@@ -66,6 +70,8 @@ def evaluate_one_epoch(
         outputs = model(image)
         loss = compute_loss(outputs, labels, criterion_dict)
         running_loss += loss.item()
+
+    last_loss = running_loss / len(val_dataloader)
 
     return last_loss
 

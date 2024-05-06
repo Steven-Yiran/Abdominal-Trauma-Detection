@@ -21,7 +21,7 @@ class InjuryClassification2DDataset(Dataset):
                 image_paths,
                 labels,
                 metadata
-            ) = raw_dataset[i] 
+            ) = raw_dataset[i]
 
             #if sample:
                 # sample(metadata['patient_id'], metadata['series_id'], metadata['frame_ids'])
