@@ -8,7 +8,7 @@ from tqdm import tqdm
 from model_zoo.injury_classification import define_model
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
-from utils.transform import ToTensorDict
+from utils.transform import ToTensorDict, Resize, ToPILImage
 
 def compute_loss(outputs, labels, criterion_dict):
     loss = 0.
@@ -70,8 +70,9 @@ def evaluate_one_epoch(
 def train(config):
     generator = torch.Generator().manual_seed(42)
     transform_fn = transforms.Compose([
-        T.Resize(config.input_size),
-        ToTensorDict()
+        ToPILImage(),
+        Resize(config.input_size),
+        ToTensorDict(),
     ])
     raw_dataset = RawDataset()
     # create train test split
