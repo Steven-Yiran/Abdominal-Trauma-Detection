@@ -31,7 +31,7 @@ def infer_frame_injuries(model, inference_dataset, activations, config):
         
         # Extract the probabilities from the model outputs
         probabilities = [
-            activations[key](value).detach().numpy().flatten()
+            activations[key](value).detach().cpu().numpy().flatten()
             for key, value in outputs.items()
         ]
 
