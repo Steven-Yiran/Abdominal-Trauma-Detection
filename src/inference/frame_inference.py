@@ -24,7 +24,8 @@ def infer_frame_injuries(model, inference_dataset, activations, config):
         series_id = metadata['series_id']
         frame_id = metadata['frame_ids']
 
-        images = torch.tensor(images).unsqueeze(0)
+        #images = torch.tensor(images).unsqueeze(0)
+        images = images.unsqueeze(0)
         images = images.to(config.device)
         outputs = model(images)
         

@@ -9,7 +9,7 @@ from model_zoo.injury_classification import define_model
 
 
 def generate(config):
-    patient_dataset = RawDataset()
+    patient_dataset = RawDataset(csv_path=config.train_csv, image_dir=config.img_dir)
     inference_dataset = InjuryClassification2DDataset(patient_dataset, is_train=False)
 
     model = define_model(config.model_name)
