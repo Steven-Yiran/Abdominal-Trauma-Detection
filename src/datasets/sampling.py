@@ -26,7 +26,6 @@ def organBasedSampling(metadata):
     request_patient_id = metadata['patient_id']
     request_patient_series_id = metadata['series_id']
 
-    MAX_NUM_FRAMES
     liver = []
     spleen = [] 
     bowel = [] 
