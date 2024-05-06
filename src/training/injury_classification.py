@@ -52,6 +52,7 @@ def evaluate_one_epoch(
     model,
     val_dataloader,
     criterion_dict,
+    device,
 ):
     model.eval()
 
@@ -60,6 +61,8 @@ def evaluate_one_epoch(
 
     for i, data in enumerate(val_dataloader):
         image, labels = data['image'], data['label']
+        image = image.to(device)
+        labels = {key: value.to(device) for key, value in labels.items()}
         outputs = model(image)
         loss = compute_loss(outputs, labels, criterion_dict)
         running_loss += loss.item()
@@ -125,6 +128,7 @@ def train(config):
             model,
             val_dataloader,
             criterion_dict,
+            config.device,
         )
         print(f'Loss: {loss:.6f}, Val Loss: {vloss:.6f}')
 
