@@ -39,24 +39,12 @@ class RandomCrop(object):
             is made.
     """
     def __init__(self, output_size):
-        assert isinstance(output_size, (int, tuple))
-        if isinstance(output_size, int):
-            self.output_size = (output_size, output_size)
-        else:
-            assert len(output_size) == 2
-            self.output_size = output_size
+        self.t = T.RandomCrop(output_size)
 
     def __call__(self, sample):
         image, label = sample['image'], sample['label']
 
-        h, w = image.shape[:2]
-        new_h, new_w = self.output_size
-
-        top = torch.randint(0, h - new_h, (1,)).item()
-        left = torch.randint(0, w - new_w, (1,)).item()
-
-        image = image[top: top + new_h,
-                      left: left + new_w]
+        image = self.t(image)
 
         return {'image': image, 'label': label}
     

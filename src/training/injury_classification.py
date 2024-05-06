@@ -8,7 +8,7 @@ from tqdm import tqdm
 from model_zoo.injury_classification import define_model
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
-from utils.transform import ToTensorDict, Resize, ToPILImage
+from utils.transform import ToTensorDict, Resize, RandomCrop, ToPILImage
 
 def compute_loss(outputs, labels, criterion_dict):
     loss = 0.
@@ -72,6 +72,7 @@ def train(config):
     transform_fn = transforms.Compose([
         ToPILImage(),
         Resize(config.input_size),
+        RandomCrop(config.input_size),
         ToTensorDict(),
     ])
     raw_dataset = RawDataset()
