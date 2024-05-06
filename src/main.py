@@ -7,6 +7,7 @@ def parse_args():
     parser.add_argument("--train-classifier", action="store_true", help="Train the injury classifier")
     parser.add_argument("--frame-inference", action="store_true", help="Inference on frame-level injuries and organ probabilities")
     parser.add_argument("--train-rnn", action="store_true", help="Train the RNN")
+    parser.add_argument("--end-to-end", action="store_true", help="Train the classifier, generate frame-level predictions, and train the RNN")
 
     return parser.parse_args()
 
@@ -81,6 +82,15 @@ def main():
         from training.series_classification import train
 
         train(config)
+
+    if args.end_to_end:
+        from training.injury_classification import train as train_classifier
+        from data_preparation.rnn_training_data import generate
+        from training.series_classification import train as train_rnn
+
+        train_classifier(config)
+        generate(config)
+        train_rnn(config)
 
 if __name__ == "__main__":
     main()
