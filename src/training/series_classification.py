@@ -8,17 +8,29 @@ from datasets.series_injury_classification_dataset import SeriesInjuryClassifica
 from model_zoo.series_classification import define_model
 
 
+def compute_accuracy(outputs, labels):
+    """
+    Compute multi-label accuracy
+    """
+    return (outputs > 0.5).eq(labels > 0.5).sum().item() / labels.numel()
+
+
 def train(config):
     generator = torch.Generator().manual_seed(42)
 
     # Load the dataset
-    train_dataset = SeriesInjuryClassificationDataset(
+    patient_dataset = SeriesInjuryClassificationDataset(
         frame_predictions_csv=config.frame_label_path,
         patient_labels_csv=config.train_csv,
         max_series_length=config.max_series_length
     )
-    print(f'Loaded {len(train_dataset)} training samples')
-
+    train_size = int(0.8 * len(patient_dataset))
+    val_size = len(patient_dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(
+        patient_dataset,
+        [train_size, val_size],
+        generator=generator
+    )
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
@@ -26,6 +38,15 @@ def train(config):
         num_workers=config.num_workers,
         generator=generator
     )
+    val_dataloader = DataLoader(
+        val_dataset,
+        batch_size=config.batch_size,
+        shuffle=False,
+        num_workers=config.num_workers,
+        generator=generator
+    )
+    print(f'Loaded {len(train_dataset)} training samples')
+    print(f'Loaded {len(val_dataset)} validation samples')
 
     # Define the model
     model = define_model(config)
@@ -52,3 +73,26 @@ def train(config):
             pbar.update(1)
         pbar.close()
         print(f'Epoch {epoch} Loss: {loss.item()}')
+
+    # Evaluate the model
+    model.eval()
+
+    val_loss = 0
+    val_accuracy = 0
+    pbar = tqdm(total=len(val_dataloader), desc='Validation')
+    for i, (features, labels) in enumerate(val_dataloader):
+        features = features.to(config.device)
+        labels = labels.to(config.device)
+        outputs = model(features)
+        loss = criterion(outputs, labels)
+        val_loss += loss.item()
+        val_accuracy += compute_accuracy(outputs, labels)
+        pbar.update(1)
+
+    pbar.close()
+
+    val_loss /= len(val_dataloader)
+    val_accuracy /= len(val_dataloader)
+    
+    print(f'Validation Loss: {val_loss}')
+    print(f'Validation Accuracy: {val_accuracy}')
