@@ -6,25 +6,19 @@ import csv
 import random
 
 
-ORGAN_SEG_INPUT_PATH = "../data/p_organ_images/organ_seg/df_images_train_with_seg.csv"
-NUMBER_OF_LABELS = 4
-THRESHOLD = 0.95
-MAX_NUM_FRAMES = 80
-
-def collectSamplingData(metadata, strategy):
-    match strategy:
+def collectSamplingData(sampling_config):
+    match sampling_config.strategy:
         case 'Uniform':
-            return uniformSampling(metadata)
+            return uniformSampling(sampling_config)
         case 'OrganBased':
-            return organBasedSampling(metadata)
+            return organBasedSampling(sampling_config)
         case _:
             raise ValueError ('Invalid Strategy Name')
             
-def organBasedSampling(metadata):
-    
-    table = pd.read_csv(ORGAN_SEG_INPUT_PATH)
-    request_patient_id = metadata['patient_id']
-    request_patient_series_id = metadata['series_id']
+def organBasedSampling(config):
+    table = pd.read_csv(config.organSegPath)
+    request_patient_id = config.metadata['patient_id']
+    request_patient_series_id = config.metadata['series_id']
 
     liver = []
     spleen = [] 
@@ -35,30 +29,31 @@ def organBasedSampling(metadata):
     for g_index in range(len(table)):
         row = table.iloc[g_index]
         if ((row['patient_id'] == request_patient_id) and (row['series'] == request_patient_series_id)):
-            if float(row['pred_liver']) >= THRESHOLD:
+            if float(row['pred_liver']) >= config.threshold:
                 liver.append(pointer)
-            if float(row['pred_spleen']) >= THRESHOLD:
+            if float(row['pred_spleen']) >= config.threshold:
                 spleen.append(pointer)
-            if float(row['pred_bowel']) >= THRESHOLD:
+            if float(row['pred_bowel']) >= config.threshold:
                 bowel.append(pointer)
-            if float(row['pred_kidney']) >= THRESHOLD:
+            if float(row['pred_kidney']) >= config.threshold:
                 kidney.append(pointer)
             pointer += 1
         else:
             pointer = 0
-    n_frame = int(MAX_NUM_FRAMES/4)
+    n_frame = int(config.numFrames/4)
     liver = random.sample(liver, min(n_frame,len(liver)))
     spleen = random.sample(spleen, min(n_frame,len(spleen)))
     bowel = random.sample(bowel, min(n_frame,len(bowel)))
     kidney = random.sample(kidney, min(n_frame, len(kidney)))
     print("Organ Based Sampling Completed.")
+    print("organ list = ", liver + spleen + bowel + kidney)
     return sorted(liver + spleen + bowel + kidney)
 
 
-def uniformSampling(metadata):
-    print("Applying sampling to patient ID:",metadata['patient_id'], ",with series ID:",metadata['series_id'])
-    frames = getNumberOfSegImages(metadata)
-    frames = min(frames, MAX_NUM_FRAMES)
+def uniformSampling(config):
+    print("Applying sampling to patient ID:",config.metadata['patient_id'], ",with series ID:",config.metadata['series_id'])
+    frames = getNumberOfSegImages(config)
+    frames = min(frames, config.numFrames)
     selected_indices = set()
     while len(selected_indices) < int(frames * 0.7):
         random_number = int(np.random.normal(0, 1) * frames)
@@ -69,10 +64,10 @@ def uniformSampling(metadata):
     print("Uniform Sampling Completed.")
     return index_list
 
-def getNumberOfSegImages(data):
-    table = pd.read_csv(ORGAN_SEG_INPUT_PATH)
-    request_patient_id = data['patient_id']
-    request_patient_series_id = data['series_id']
+def getNumberOfSegImages(config):
+    table = pd.read_csv(config.organSegPath)
+    request_patient_id = config.metadata['patient_id']
+    request_patient_series_id = config.metadata['series_id']
     counter = 0
     for i in range(len(table)):
         row = table.iloc[i]

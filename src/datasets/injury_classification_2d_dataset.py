@@ -6,8 +6,15 @@ from torch.utils.data import Dataset
 from raw_dataset import RawDataset
 import sampling
 
-UNIFORM = 'Uniform'
-ORGAN = 'OrganBased'
+class sampling_config():
+        metadata = None
+        organSegPath = "../data/p_organ_images/organ_seg/df_images_train_with_seg.csv" #Organ seg path 
+        threshold = 0.95 # True threshold
+        numFrames = 80 # total number of frames to choice
+        strategy = "OrganBased" #"Uniform"  # samping switch
+        @classmethod
+        def set_data(cls, data):
+           cls.metadata = data
 
 class InjuryClassification2DDataset(Dataset):
     '''
@@ -25,8 +32,8 @@ class InjuryClassification2DDataset(Dataset):
             ) = raw_dataset[i] 
 
             if sample:
-                sample_index = sample(metadata, UNIFORM)
-                pass
+                sampling_config.set_data(metadata)
+                sample_index = sample(sampling_config)
 
             for i in sample_index:
                 data = {
@@ -70,4 +77,4 @@ if __name__ == '__main__':
     dataset = InjuryClassification2DDataset(raw_dataset, sample = sampling.collectSamplingData)
 
     for sample in dataset:
-        print(sample)
+        print("sample = ", sample)
