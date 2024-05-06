@@ -6,9 +6,10 @@ import os
 
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
-from inference.frame_inference import infer_frame_injuries, infer_frame_organs, infer_frame_injuries_batch
+from inference.frame_inference import infer_frame_organs, infer_frame_injuries_batch
 from model_zoo.injury_classification import define_model
 from utils.transform import ToTensor, Resize, RandomCrop, ToPILImage
+from datasets.sampling import SamplingStrategies
 
 
 def generate(config):
@@ -26,7 +27,13 @@ def generate(config):
     ])
     
     patient_dataset = RawDataset(csv_path=config.train_csv, image_dir=config.img_dir)
-    inference_dataset = InjuryClassification2DDataset(patient_dataset, is_train=False, transform=test_transform)
+    sample = SamplingStrategies(
+        "All",
+        config.max_frame_per_patient,
+        config.segmentations_csv,
+        config.threshold
+    )
+    inference_dataset = InjuryClassification2DDataset(patient_dataset, sample=sample, is_train=False, transform=test_transform)
     inference_dataloader = torch.utils.data.DataLoader(
         inference_dataset,
         batch_size=config.batch_size,

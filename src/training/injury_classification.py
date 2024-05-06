@@ -8,6 +8,7 @@ from tqdm import tqdm
 from model_zoo.injury_classification import define_model
 from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
+from datasets.sampling import SamplingStrategies
 from utils.transform import ToTensorDict, Resize, RandomCrop, ToPILImage
 
 def compute_loss(outputs, labels, criterion_dict):
@@ -88,12 +89,23 @@ def train(config):
         csv_path=config.train_csv,
         image_dir=config.img_dir,
     )
-    # create train test split
-    patient_dataset = InjuryClassification2DDataset(raw_dataset, transform=transform_fn)
+    # define sampling strategy
+    print(f'Using {config.strategy} sampling strategy, with max frame per patient: {config.max_frame_per_patient}')
+    print('-------------------')
+    sample = SamplingStrategies(
+        config.strategy,
+        config.max_frame_per_patient,
+        config.segmentations_csv,
+        config.threshold
+    )
+    patient_dataset = InjuryClassification2DDataset(raw_dataset, sample=sample, transform=transform_fn)
+    # create train test split with sampling
     train_size = int(0.8 * len(patient_dataset))
     val_size = len(patient_dataset) - train_size
     train_dataset, val_dataset = random_split(patient_dataset, [train_size, val_size], generator=generator)
-    # select a subset of the dataset
+    print(f'Loaded {len(train_dataset)} training samples')
+    print(f'Loaded {len(val_dataset)} validation samples')
+
     train_dataloader = DataLoader(
         train_dataset,
         batch_size=config.batch_size,
@@ -106,8 +118,6 @@ def train(config):
         shuffle=False,
         num_workers=config.num_workers,
     )
-    print(f'Loaded {len(train_dataset)} training samples')
-    print(f'Loaded {len(val_dataset)} validation samples')
 
     model = define_model(config.model_name)
     model.to(config.device)

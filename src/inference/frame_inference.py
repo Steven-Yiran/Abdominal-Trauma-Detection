@@ -3,9 +3,6 @@ import pandas as pd
 from tqdm import tqdm
 import os
 
-from model_zoo.injury_classification import define_model
-from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
-
 def infer_frame_organs(config):
     """Infer frame-level organ segmentations.
     """
@@ -39,7 +36,7 @@ def infer_frame_injuries_batch(model, dataloader, activations, config):
             ]
 
             for i in range(len(images)):
-                probabilities = [item[i] for item in probabilities_batch]
+                probabilities = [val for sublist in probabilities_batch for val in sublist[i]]
 
                 results.append({
                     'patient_id': int(patient_id[i].item()),

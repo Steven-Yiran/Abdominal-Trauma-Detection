@@ -34,6 +34,11 @@ class Config:
     input_size = 224
     num_workers = 4
 
+    # Sampling
+    strategy = "Uniform" # Random or OrganBased or Sequential or Uniform
+    threshold = 0.5
+    max_frame_per_patient = 50
+
     # Model
     model_name = "efficientnet_b0"
     num_classes = 13
