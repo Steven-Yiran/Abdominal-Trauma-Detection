@@ -14,8 +14,6 @@ def infer_frame_organs(config):
 def infer_frame_injuries(model, inference_dataset, activations, config):
     """Infer frame-level injuries.
     """
-    model.eval()
-
     results = []
     pbar = tqdm(total=len(inference_dataset), desc='Inference')
     for i in range(len(inference_dataset)):

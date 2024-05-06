@@ -15,6 +15,18 @@ def compute_accuracy(outputs, labels):
     return (outputs > 0.5).eq(labels > 0.5).sum().item() / labels.numel()
 
 
+def compute_f1(outputs, labels):
+    """
+    Compute multi-label F1 score
+    """
+    tp = (outputs > 0.5).eq(labels > 0.5).sum().item()
+    fp = (outputs > 0.5).eq(labels < 0.5).sum().item()
+    fn = (outputs < 0.5).eq(labels > 0.5).sum().item()
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+    return 2 * precision * recall / (precision + recall)
+
+
 def train(config):
     generator = torch.Generator().manual_seed(42)
 
@@ -79,6 +91,7 @@ def train(config):
 
     val_loss = 0
     val_accuracy = 0
+    val_f1 = 0
     pbar = tqdm(total=len(val_dataloader), desc='Validation')
     for i, (features, labels) in enumerate(val_dataloader):
         features = features.to(config.device)
@@ -87,12 +100,15 @@ def train(config):
         loss = criterion(outputs, labels)
         val_loss += loss.item()
         val_accuracy += compute_accuracy(outputs, labels)
+        val_f1 += compute_f1(outputs, labels)
         pbar.update(1)
 
     pbar.close()
 
     val_loss /= len(val_dataloader)
     val_accuracy /= len(val_dataloader)
+    val_f1 /= len(val_dataloader)
     
     print(f'Validation Loss: {val_loss}')
     print(f'Validation Accuracy: {val_accuracy}')
+    print(f'Validation F1: {val_f1}')
