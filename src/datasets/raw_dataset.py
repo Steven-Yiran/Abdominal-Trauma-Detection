@@ -28,8 +28,10 @@ class RawDataset():
     Raw dataset.
     '''
     
-    def __init__(self):
-        self.table = pd.read_csv('../data/train.csv')
+    def __init__(self, csv_path, image_dir):
+        self.csv_path = csv_path
+        self.image_dir = image_dir
+        self.table = pd.read_csv(csv_path)
 
     def __len__(self):
         '''
@@ -59,14 +61,14 @@ class RawDataset():
         row = self.table.iloc[index]
 
         patient_id = row[patient_id_column_name]
-        patient_path = f'../data/train_images/{patient_id}'
+        patient_path = f'{self.image_dir}/train_images/{patient_id}'
         # select the first series of the patient
         series_id = int(os.listdir(patient_path)[0])
         series_path = os.path.join(patient_path, str(series_id))
         frame_ids = sorted([int(file_name.split('.')[0]) for file_name in os.listdir(series_path)])
         image_paths = sorted([os.path.join(series_path, file_name) for file_name in os.listdir(series_path)])
 
-        images = np.array([read_image(image_path).to(torch.float32) / 255.0 for image_path in image_paths])
+        # images = np.array([read_image(image_path).to(torch.float32) / 255.0 for image_path in image_paths])
 
         bowel_healthy = row[bowel_healthy_column_name].astype(np.float32)
         
@@ -114,7 +116,7 @@ class RawDataset():
         }
 
         return (
-            images,
+            image_paths,
             labels,
             metadata
         )

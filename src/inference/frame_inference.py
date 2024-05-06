@@ -3,7 +3,6 @@ import pandas as pd
 from tqdm import tqdm
 
 from model_zoo.injury_classification import define_model
-from datasets.raw_dataset import RawDataset
 from datasets.injury_classification_2d_dataset import InjuryClassification2DDataset
 
 def infer_frame_organs(config):

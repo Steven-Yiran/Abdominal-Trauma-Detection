@@ -78,7 +78,10 @@ def train(config):
         RandomCrop(config.input_size),
         ToTensorDict(),
     ])
-    raw_dataset = RawDataset()
+    raw_dataset = RawDataset(
+        csv_path=config.train_csv,
+        image_dir=config.img_dir,
+    )
     # create train test split
     patient_dataset = InjuryClassification2DDataset(raw_dataset, transform=transform_fn)
     train_size = int(0.8 * len(patient_dataset))
