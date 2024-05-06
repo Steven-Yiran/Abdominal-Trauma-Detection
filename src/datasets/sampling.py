@@ -46,7 +46,6 @@ def organBasedSampling(config):
     bowel = random.sample(bowel, min(n_frame,len(bowel)))
     kidney = random.sample(kidney, min(n_frame, len(kidney)))
     print("Organ Based Sampling Completed.")
-    print("organ list = ", liver + spleen + bowel + kidney)
     return sorted(liver + spleen + bowel + kidney)
 
 
