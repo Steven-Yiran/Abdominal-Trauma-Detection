@@ -14,6 +14,7 @@ def generate(config):
 
     model = define_model(config.model_name)
     model.load_state_dict(torch.load(f'{config.model_checkpoint_name}.pth'))
+    model.to(config.device)
 
     activations = {
         'bowel': nn.Sigmoid(),
