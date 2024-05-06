@@ -14,8 +14,10 @@ def train(config):
     # Load the dataset
     train_dataset = SeriesInjuryClassificationDataset(
         frame_predictions_csv=config.frame_label_path,
-        patient_labels_csv=config.train_csv
+        patient_labels_csv=config.train_csv,
+        max_series_length=config.max_series_length
     )
+    print(f'Loaded {len(train_dataset)} training samples')
 
     train_dataloader = DataLoader(
         train_dataset,

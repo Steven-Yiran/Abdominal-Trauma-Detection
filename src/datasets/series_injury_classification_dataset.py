@@ -20,10 +20,11 @@ spleen_high_column_name = 'spleen_high'
 
 
 class SeriesInjuryClassificationDataset(Dataset):
-    def __init__(self, frame_predictions_csv, patient_labels_csv):
+    def __init__(self, frame_predictions_csv, patient_labels_csv, max_series_length):
         self.frame_predictions = pd.read_csv(frame_predictions_csv)
         self.patients = self.frame_predictions['patient_id'].unique()
         self.patient_labels = pd.read_csv(patient_labels_csv)
+        self.max_series_length = max_series_length
 
     def __len__(self):
         return len(self.patients)
@@ -37,6 +38,12 @@ class SeriesInjuryClassificationDataset(Dataset):
         labels = patient_labels.drop(columns=['patient_id', 'any_injury', 'bowel_injury', 'extravasation_injury'])
         # reduce to one row
         labels = labels.iloc[0]
+
+        # crop features to fix size of 10]
+        if len(features) > self.max_series_length:
+            features = features[:self.max_series_length]
+        elif len(features) < self.max_series_length:
+            features = pd.concat([features, pd.DataFrame(index=range(self.max_series_length - len(features)))])
 
         return torch.tensor(features.values, dtype=torch.float32), torch.tensor(labels.values, dtype=torch.float32)
 

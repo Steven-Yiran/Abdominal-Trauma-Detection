@@ -50,6 +50,7 @@ class Config:
     hidden_dim = 128
     num_layers = 2
     output_dim = 11
+    max_series_length = 50
 
     # Inference
     segmentations_csv = "../data/df_images_train_with_seg.csv"
