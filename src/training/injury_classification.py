@@ -98,7 +98,7 @@ def train(config):
         config.segmentations_csv,
         config.threshold
     )
-    patient_dataset = InjuryClassification2DDataset(raw_dataset, sample=sample, transform=transform_fn)
+    patient_dataset = InjuryClassification2DDataset(raw_dataset, sample=sample, transform=transform_fn, is_train=False)
     # create train test split with sampling
     train_size = int(0.8 * len(patient_dataset))
     val_size = len(patient_dataset) - train_size
@@ -155,3 +155,5 @@ def train(config):
             best_val_loss = vloss
             torch.save(model.state_dict(), f'../models/{config.model_checkpoint_name}.pth')
             print('Model saved')
+
+    return train_dataset

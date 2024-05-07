@@ -75,9 +75,11 @@ class ToTensorDict(object):
         for k, v in label.items():
             if type(v) == np.ndarray:
                 label[k] = torch.from_numpy(v)
-
-        return {'image': T.ToTensor()(image),
-                'label': label}
+        
+        image = T.ToTensor()(image)
+        sample['image'] = image
+        sample['label'] = label
+        return sample
     
 
 class ToPILImage(object):

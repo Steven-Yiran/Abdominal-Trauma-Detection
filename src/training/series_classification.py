@@ -27,6 +27,13 @@ def compute_f1(outputs, labels):
     return 2 * precision * recall / (precision + recall)
 
 
+def compute_roc_auc(outputs, labels):
+    """
+    Compute multi-label ROC AUC
+    """
+    
+
+
 def train(config):
     generator = torch.Generator().manual_seed(42)
 

@@ -12,7 +12,7 @@ from utils.transform import ToTensor, Resize, RandomCrop, ToPILImage
 from datasets.sampling import SamplingStrategies
 
 
-def generate(config):
+def generate(config, inference_dataset=None):
     """
     Generate frame-level injury predictions and organ segmentations.
     """
@@ -25,20 +25,21 @@ def generate(config):
         RandomCrop(config.input_size),
         ToTensor()
     ])
+    if not inference_dataset:
+        patient_dataset = RawDataset(csv_path=config.train_csv, image_dir=config.img_dir)
+        sample = SamplingStrategies(
+            "All",
+            config.max_frame_per_patient,
+            config.segmentations_csv,
+            config.threshold
+        )
+        inference_dataset = InjuryClassification2DDataset(patient_dataset, sample=sample, is_train=False, transform=test_transform)
     
-    patient_dataset = RawDataset(csv_path=config.train_csv, image_dir=config.img_dir)
-    sample = SamplingStrategies(
-        "All",
-        config.max_frame_per_patient,
-        config.segmentations_csv,
-        config.threshold
-    )
-    inference_dataset = InjuryClassification2DDataset(patient_dataset, sample=sample, is_train=False, transform=test_transform)
     inference_dataloader = torch.utils.data.DataLoader(
         inference_dataset,
         batch_size=config.batch_size,
         shuffle=False,
-        num_workers=1
+        num_workers=config.num_workers
     )
 
     model = define_model(config.model_name)

@@ -88,8 +88,8 @@ def main():
         from data_preparation.rnn_training_data import generate
         from training.series_classification import train as train_rnn
 
-        train_classifier(config)
-        generate(config)
+        train_dataset = train_classifier(config)
+        generate(config, train_dataset)
         train_rnn(config)
 
 if __name__ == "__main__":

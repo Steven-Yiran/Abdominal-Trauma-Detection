@@ -20,9 +20,9 @@ def drawAccuracyComparisons(title : str, categories: list, accuracy : list, path
         raise ValueError ("Empty input")
     
     # Diagram type is bar
-    plt.bar(categories, accuracy)
-    plt.xlabel('categories')
-    plt.ylabel('accuracy')
+    plt.bar(categories, accuracy, color='blue')
+    plt.xlabel('Sampling Strategies')
+    plt.ylabel('Accuracy')
     plt.title(title)
 
 
@@ -31,3 +31,7 @@ def drawAccuracyComparisons(title : str, categories: list, accuracy : list, path
     # plt.show() 
     plt.close()
     print("Diagram saved to " + path + 'bar_graph.png')
+
+
+if __name__ == "__main__":
+    drawAccuracyComparisons("Sampling Strategies Accuracy Comparison", ['Organ', 'Uniform', 'Random', 'Sequential'], [0.91, 0.92, 0.92, 0.8], "../plots/")
