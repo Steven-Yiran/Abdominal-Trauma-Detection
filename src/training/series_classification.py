@@ -27,6 +27,14 @@ def compute_f1(outputs, labels):
     return 2 * precision * recall / (precision + recall)
 
 
+def compute_fn(outputs, labels):
+    """
+    Compute multi-label F1 score
+    """
+    fn = (outputs < 0.5).eq(labels > 0.5).sum().item()
+    return fn / labels.numel()
+
+
 def compute_roc_auc(outputs, labels):
     """
     Compute multi-label ROC AUC
@@ -99,6 +107,7 @@ def train(config):
     val_loss = 0
     val_accuracy = 0
     val_f1 = 0
+    val_fn = 0
     pbar = tqdm(total=len(val_dataloader), desc='Validation')
     for i, (features, labels) in enumerate(val_dataloader):
         features = features.to(config.device)
@@ -108,6 +117,7 @@ def train(config):
         val_loss += loss.item()
         val_accuracy += compute_accuracy(outputs, labels)
         val_f1 += compute_f1(outputs, labels)
+        val_fn += compute_fn(outputs, labels)
         pbar.update(1)
 
     pbar.close()
@@ -115,7 +125,9 @@ def train(config):
     val_loss /= len(val_dataloader)
     val_accuracy /= len(val_dataloader)
     val_f1 /= len(val_dataloader)
+    val_fn /= len(val_dataloader)
     
     print(f'Validation Loss: {val_loss}')
     print(f'Validation Accuracy: {val_accuracy}')
     print(f'Validation F1: {val_f1}')
+    print(f'Validation FN: {val_fn}')
