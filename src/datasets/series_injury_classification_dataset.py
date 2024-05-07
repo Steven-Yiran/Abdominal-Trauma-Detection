@@ -1,5 +1,6 @@
 import torch
 import pandas as pd
+import numpy as np
 from torch.utils.data import Dataset
 
 patient_id_column_name = 'patient_id'
@@ -43,7 +44,11 @@ class SeriesInjuryClassificationDataset(Dataset):
         if len(features) > self.max_series_length:
             features = features[:self.max_series_length]
         elif len(features) < self.max_series_length:
-            features = pd.concat([features, pd.DataFrame(index=range(self.max_series_length - len(features)))])
+            num_padding_rows = self.max_series_length - len(features)
+            padding = np.zeros((num_padding_rows, features.shape[1]))
 
+            padding_df = pd.DataFrame(padding, columns=features.columns)
+            features = pd.concat([features, padding_df], ignore_index=True)
+    
         return torch.tensor(features.values, dtype=torch.float32), torch.tensor(labels.values, dtype=torch.float32)
 

@@ -35,13 +35,6 @@ def compute_fn(outputs, labels):
     return fn / labels.numel()
 
 
-def compute_roc_auc(outputs, labels):
-    """
-    Compute multi-label ROC AUC
-    """
-    
-
-
 def train(config):
     generator = torch.Generator().manual_seed(42)
 
